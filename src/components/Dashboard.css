@@ -1,0 +1,22 @@
+/* src/pages/Dashboard.css */
+body{
+    background-color: #050a0f; /* Light gray */
+
+}
+.container {
+  max-width: 900px;
+  
+}
+
+
+h4, h5 {
+  font-weight: bold;
+}
+
+ul li {
+  margin-bottom: 8px;
+}
+
+  
+
+

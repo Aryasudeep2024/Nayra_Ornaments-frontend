@@ -1,0 +1,19 @@
+.nav-pill-link {
+  color: #000;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 999px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-pill-link:hover {
+  background-color: #000;
+  color: #fff !important;
+}
+
+/* Optional: if you want to highlight the active route */
+.nav-pill-link.active {
+  background-color: #000;
+  color: #fff !important;
+}
