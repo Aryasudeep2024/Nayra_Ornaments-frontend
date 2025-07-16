@@ -26,7 +26,8 @@ const AdminLogin = () => {
 
     try {
       const response = await API.post('/admin/login', { email, password }, { withCredentials: true });
-      const admin = response.data.admin;
+      const admin = response.data.user;
+
 
       if (!admin || admin.role !== 'superadmin') {
         setErrorMsg('Unauthorized access');
