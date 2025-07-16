@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Spinner } from 'react-bootstrap';
-import axios from '../../api/axios'; // Update path if needed
+import axios from '../../api/axios';
+import { useTheme } from '../../context/ThemeContext'; // ✅ import theme context
 
 const AddSeller = () => {
+  const { theme } = useTheme(); // ✅ get current theme
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -10,7 +13,7 @@ const AddSeller = () => {
     profilePic: '',
     shopName: '',
     contactNumber: '',
-    isApproved: true // Optional toggle
+    isApproved: true
   });
 
   const [loading, setLoading] = useState(false);
@@ -75,81 +78,62 @@ const AddSeller = () => {
   };
 
   return (
-    <div className="p-4 bg-light rounded shadow-sm">
+    <div
+      className="p-4 rounded shadow-sm"
+      style={{
+        backgroundColor: theme === 'dark' ? '#1e1e1e' : '#f8f9fa',
+        color: theme === 'dark' ? '#ffffff' : '#000000',
+        transition: 'all 0.3s ease'
+      }}
+    >
       <h3 className="mb-4">Add New Seller</h3>
 
-      {message && <Alert variant="success" onClose={() => setMessage('')} dismissible>{message}</Alert>}
-      {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
+      {message && (
+        <Alert
+          variant={theme === 'dark' ? 'success' : 'success'}
+          onClose={() => setMessage('')}
+          dismissible
+        >
+          {message}
+        </Alert>
+      )}
+
+      {error && (
+        <Alert
+          variant={theme === 'dark' ? 'danger' : 'danger'}
+          onClose={() => setError('')}
+          dismissible
+        >
+          {error}
+        </Alert>
+      )}
 
       <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>Seller Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            required
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter full name"
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Email Address</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter seller's email"
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter a secure password"
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Profile Picture URL</Form.Label>
-          <Form.Control
-            type="text"
-            name="profilePic"
-            value={formData.profilePic}
-            onChange={handleChange}
-            placeholder="Paste profile image URL (optional)"
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Shop Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="shopName"
-            value={formData.shopName}
-            onChange={handleChange}
-            placeholder="Enter shop name"
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Contact Number</Form.Label>
-          <Form.Control
-            type="text"
-            name="contactNumber"
-            value={formData.contactNumber}
-            onChange={handleChange}
-            placeholder="Enter mobile or phone number"
-          />
-        </Form.Group>
+        {[
+          { label: 'Seller Name', name: 'name', type: 'text', placeholder: 'Enter full name' },
+          { label: 'Email Address', name: 'email', type: 'email', placeholder: "Enter seller's email" },
+          { label: 'Password', name: 'password', type: 'password', placeholder: 'Enter a secure password' },
+          { label: 'Profile Picture URL', name: 'profilePic', type: 'text', placeholder: 'Paste profile image URL (optional)' },
+          { label: 'Shop Name', name: 'shopName', type: 'text', placeholder: 'Enter shop name' },
+          { label: 'Contact Number', name: 'contactNumber', type: 'text', placeholder: 'Enter mobile or phone number' }
+        ].map(({ label, name, type, placeholder }) => (
+          <Form.Group key={name} className="mb-3">
+            <Form.Label>{label}</Form.Label>
+            <Form.Control
+              type={type}
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              placeholder={placeholder}
+              style={{
+                backgroundColor: theme === 'dark' ? '#333' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#000',
+                borderColor: theme === 'dark' ? '#555' : '#ced4da'
+              }}
+              required={name !== 'profilePic'}
+            />
+          </Form.Group>
+        ))}
 
         <Form.Group className="mb-3">
           <Form.Check
@@ -158,6 +142,7 @@ const AddSeller = () => {
             name="isApproved"
             checked={formData.isApproved}
             onChange={handleChange}
+            style={{ color: theme === 'dark' ? '#fff' : '#000' }}
           />
         </Form.Group>
 

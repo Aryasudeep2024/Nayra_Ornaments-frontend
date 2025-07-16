@@ -5,24 +5,26 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout as logoutAction, setCredentials } from "../features/auth/authSlice";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
-// Import user-specific components
+import OrdersModal from "../components/OrdersModal";
 import CartUser from "../components/userDashboard/cartUser";
 import UserProfile from "../components/userDashboard/userProfile";
 import UpdateUser from "../components/userDashboard/updateUser";
 import ResetPassword from "../components/userDashboard/resetPassword";
+import { useTheme } from "../context/ThemeContext";
+import { Modal, Button } from "react-bootstrap"; // ✅ Add Bootstrap Modal
 
 const UserDashboard = () => {
-  
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ for checking if redirected with cart open
+  const location = useLocation();
+  const { theme } = useTheme();
 
   const user = useSelector((state) => state.auth.user);
   const [loading, setLoading] = useState(false);
-  const [activeSection, setActiveSection] = useState("cart"); // Default section
+  const [activeSection, setActiveSection] = useState("cart");
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // ✅ modal state
 
-  // ✅ Fetch user if not already in Redux
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -36,12 +38,10 @@ const UserDashboard = () => {
     }
   };
 
-  // ✅ Run only once on mount to handle openCart state
   useEffect(() => {
     if (!user) {
       fetchUserData();
     }
-    // Handle redirection from "Add to Cart" to open Cart directly
     if (location.state?.openCart) {
       setActiveSection("cart");
     }
@@ -58,14 +58,12 @@ const UserDashboard = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete your account?")) {
-      try {
-        await axios.delete("/user/delete", { withCredentials: true });
-        dispatch(logoutAction());
-        navigate("/register-user");
-      } catch (error) {
-        console.error("❌ Error deleting account", error);
-      }
+    try {
+      await axios.delete("/user/delete", { withCredentials: true });
+      dispatch(logoutAction());
+      navigate("/register-user");
+    } catch (error) {
+      console.error("❌ Error deleting account", error);
     }
   };
 
@@ -73,12 +71,17 @@ const UserDashboard = () => {
     return <p className="mt-5 text-center">Loading user profile...</p>;
   }
 
+  const isDark = theme === "dark";
+
   return (
     <>
       <Navbar />
       <div className="d-flex" style={{ minHeight: "100vh" }}>
         {/* Sidebar */}
-        <div className="bg-dark text-white p-3" style={{ width: "250px" }}>
+        <div
+          className={`p-3 ${isDark ? "bg-dark text-white" : "bg-light text-dark"}`}
+          style={{ width: "250px", transition: "background 0.3s, color 0.3s" }}
+        >
           <div className="text-center mb-4">
             <img
               src={user?.profilePic || "/images/userpic.png"}
@@ -91,59 +94,83 @@ const UserDashboard = () => {
           </div>
 
           <ul className="nav flex-column">
+            {[
+              { key: "cart", label: "🛒 My Cart" },
+              { key: "profile", label: "👤 My Profile" },
+              { key: "update", label: "✏️ Update Profile" },
+              { key: "reset", label: "🔒 Reset Password" },
+              { key: "orders", label: "🧾 My Orders", isModal: true },
+            ].map(({ key, label, isModal }) => (
+              <li key={key} className="nav-item mb-2">
+                <button
+                  className={`btn w-100 ${
+                    activeSection === key ? "btn-warning" : isDark ? "btn-outline-light" : "btn-outline-dark"
+                  }`}
+                  onClick={() => {
+                    setActiveSection(key);
+                    if (isModal) setShowOrdersModal(true);
+                  }}
+                >
+                  {label}
+                </button>
+              </li>
+            ))}
+
             <li className="nav-item mb-2">
               <button
-                className={`btn w-100 mt-4 ${activeSection === "cart" ? "btn-warning" : "btn-outline-light"}`}
-                onClick={() => setActiveSection("cart")}
+                className={`btn w-100 ${isDark ? "btn-outline-light" : "btn-outline-danger"}`}
+                onClick={() => setShowDeleteModal(true)} // ✅ Open modal
               >
-                🛒 My Cart
-              </button>
-            </li>
-            <li className="nav-item mb-2">
-              <button
-                className={`btn w-100 ${activeSection === "profile" ? "btn-warning" : "btn-outline-light"}`}
-                onClick={() => setActiveSection("profile")}
-              >
-                👤 My Profile
-              </button>
-            </li>
-            <li className="nav-item mb-2">
-              <button
-                className={`btn w-100 ${activeSection === "update" ? "btn-warning" : "btn-outline-light"}`}
-                onClick={() => setActiveSection("update")}
-              >
-                ✏️ Update Profile
-              </button>
-            </li>
-            <li className="nav-item mb-2">
-              <button
-                className={`btn w-100 ${activeSection === "reset" ? "btn-warning" : "btn-outline-light"}`}
-                onClick={() => setActiveSection("reset")}
-              >
-                🔒 Reset Password
-              </button>
-            </li>
-            <li className="nav-item mb-2">
-              <button className="btn w-100 btn-outline-light" onClick={handleDelete}>
                 ❌ Delete Account
               </button>
             </li>
             <li className="nav-item">
-              <button className="btn w-100 btn-outline-light" onClick={handleLogout}>
+              <button
+                className={`btn w-100 ${isDark ? "btn-outline-light" : "btn-outline-secondary"}`}
+                onClick={handleLogout}
+              >
                 🚪 Logout
               </button>
             </li>
           </ul>
         </div>
 
-        {/* Right Content */}
-        <div className="p-4 flex-grow-1 bg-light">
+        {/* Right content */}
+        <div className={`p-4 flex-grow-1 ${isDark ? "bg-black text-light" : "bg-light text-dark"}`}>
           {activeSection === "cart" && <CartUser />}
           {activeSection === "profile" && <UserProfile />}
           {activeSection === "update" && <UpdateUser />}
           {activeSection === "reset" && <ResetPassword />}
         </div>
       </div>
+
+      {/* Orders Modal */}
+      <OrdersModal
+        show={showOrdersModal}
+        handleClose={() => {
+          setShowOrdersModal(false);
+          setActiveSection("profile");
+        }}
+      />
+
+      {/* ✅ Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton className={isDark ? "bg-dark text-white" : ""}>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={isDark ? "bg-dark text-white" : ""}>
+          Are you sure you want to delete your account? This action cannot be undone.
+        </Modal.Body>
+        <Modal.Footer className={isDark ? "bg-dark" : ""}>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete My Account
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Footer />
     </>
   );

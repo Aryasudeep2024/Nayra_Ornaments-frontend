@@ -1,48 +1,73 @@
-import { Navbar, Nav, Container } from "react-bootstrap";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
 import { FaUser, FaSearch, FaShoppingCart } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 import './NavbarStyles.css';
 import { useSelector } from 'react-redux';
-
+import SearchModal from "./SearchModal";
+import { useTheme } from '../context/ThemeContext';
 
 const CustomNavbar = ({ cartItemCount }) => {
   const navigate = useNavigate();
-  const { userInfo } = useSelector((state) => state.auth);
- console.log("userinfo:",userInfo)
+  const { user } = useSelector((state) => state.auth);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const { theme, toggleTheme } = useTheme(); // ✅ Access theme context
+
   const handleUserIconClick = () => {
-    if (!userInfo) {
+    if (!user) {
       navigate("/dashboard");
-    } else if (userInfo.role === 'user') {
+    } else if (user.role === 'user') {
       navigate("/user/dashboard");
-    } else if (userInfo.role === 'seller') {
+    } else if (user.role === 'seller') {
       navigate("/seller/dashboard");
-    } else if (userInfo.role === 'superadmin') {
+    } else if (user.role === 'superadmin') {
       navigate("/admin/dashboard");
     }
   };
 
-  return (
-    <div style={{ width: "100%", backgroundColor: "#000" }}>
-      {/* Main Navbar - Black (if needed) */}
-      <Navbar bg="black" expand="lg" className="shadow-sm px-4 w-100">
-        {/* Optional top bar content here */}
-      </Navbar>
+  const handleCartIconClick = () => {
+    if (!user) {
+      navigate("/dashboard");
+    } else if (user.role === 'user') {
+      navigate("/user/dashboard");
+    } else if (user.role === 'seller') {
+      alert("You don't have any cart items because your role is Seller.");
+    } else if (user.role === 'superadmin') {
+      alert("You don't have any cart items because your role is Super Admin.");
+    }
+  };
 
-      {/* White Navbar with Full Width and Left-Aligned Links */}
+  return (
+    <div
+      style={{
+        width: "100%",
+        backgroundColor: theme === 'dark' ? "#111" : "#fff",
+        transition: "all 0.3s ease"
+      }}
+    >
+      <Navbar
+        bg={theme === 'dark' ? "dark" : "light"}
+        expand="lg"
+        className="shadow-sm px-4 w-100"
+      />
+
       <div
         style={{
           width: "100%",
-          backgroundColor: "white",
-          borderRadius: "15px 15px 15px 15px",
+          backgroundColor: theme === 'dark' ? "#1a1a1a" : "white",
+          borderRadius: "15px",
+          color: theme === 'dark' ? "#fff" : "#000",
+          transition: "all 0.3s ease"
         }}
       >
         <Container fluid className="d-flex align-items-center justify-content-between px-4 py-3">
-          
+
           {/* Left Navigation Links */}
           <Nav className="d-flex gap-4 ms-3">
-            <Nav.Link as={Link} to="/" className="nav-pill-link text-black">Rings</Nav.Link>
-            <Nav.Link as={Link} to="/collections" className="nav-pill-link text-black">Collection</Nav.Link>
-            <Nav.Link as={Link} to="/contact" className="nav-pill-link text-black">New Arrivals</Nav.Link>
+            <Nav.Link as={Link} to="/" className={`nav-pill-link ${theme === 'dark' ? 'text-light' : 'text-black'}`}>Home</Nav.Link>
+            <Nav.Link as={Link} to="/collection/Ring" className={`nav-pill-link ${theme === 'dark' ? 'text-light' : 'text-black'}`}>Rings</Nav.Link>
+            <Nav.Link as={Link} to="/collections" className={`nav-pill-link ${theme === 'dark' ? 'text-light' : 'text-black'}`}>Collection</Nav.Link>
+            <Nav.Link as={Link} to="/collection/new-arrivals" className={`nav-pill-link ${theme === 'dark' ? 'text-light' : 'text-black'}`}>New Arrivals</Nav.Link>
           </Nav>
 
           {/* Brand in Center */}
@@ -54,19 +79,12 @@ const CustomNavbar = ({ cartItemCount }) => {
               <span style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: '28px',
-                color: '#003D33',
+                color: theme === 'dark' ? '#B2DFDB' : '#003D33',
                 position: 'relative'
               }}>
                 Naira
                 <span style={{ position: 'relative', display: 'inline-block' }}>
                   &nbsp;💎
-                  <span style={{
-                    position: 'absolute',
-                    top: '-0.6em',
-                    left: '0.1em',
-                    fontSize: '0.6em',
-                  }}>
-                  </span>
                 </span>
                 Diamonds
               </span>
@@ -74,7 +92,7 @@ const CustomNavbar = ({ cartItemCount }) => {
                 fontFamily: "'Cinzel', serif",
                 fontSize: '10px',
                 letterSpacing: '6px',
-                color: '#555',
+                color: theme === 'dark' ? '#aaa' : '#555',
                 textAlign: 'left',
                 paddingLeft: '60px'
               }}>By Arya</div>
@@ -83,17 +101,30 @@ const CustomNavbar = ({ cartItemCount }) => {
 
           {/* Right Side Icons */}
           <div className="d-flex align-items-center gap-4 me-3">
-            <FaSearch style={{ cursor: 'pointer' }} />
 
-            {/* Updated User Icon with role-based navigation */}
-            <span onClick={handleUserIconClick} style={{ color: 'inherit', cursor: 'pointer' }}>
+            {/* Search Icon */}
+            <FaSearch
+              style={{ cursor: 'pointer', color: theme === 'dark' ? '#fff' : '#000' }}
+              onClick={() => setShowSearchModal(true)}
+            />
+            <SearchModal show={showSearchModal} onHide={() => setShowSearchModal(false)} />
+
+            {/* User Icon */}
+            <span
+              onClick={handleUserIconClick}
+              style={{ cursor: 'pointer', color: theme === 'dark' ? '#fff' : '#000' }}
+            >
               <FaUser />
             </span>
 
-            {/* Cart Icon with Count */}
-            <Link to="/user/cart" className="position-relative" style={{ color: 'inherit' }}>
-              <FaShoppingCart style={{ cursor: 'pointer', fontSize: '1.3rem' }} />
-              {cartItemCount > 0 && (
+            {/* Cart Icon */}
+            <span
+              onClick={handleCartIconClick}
+              className="position-relative"
+              style={{ cursor: 'pointer', color: theme === 'dark' ? '#fff' : '#000' }}
+            >
+              <FaShoppingCart style={{ fontSize: '1.3rem' }} />
+              {cartItemCount > 0 && user?.role === 'user' && (
                 <span
                   className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                   style={{ fontSize: '0.6rem' }}
@@ -101,9 +132,17 @@ const CustomNavbar = ({ cartItemCount }) => {
                   {cartItemCount}
                 </span>
               )}
-            </Link>
-          </div>
+            </span>
 
+            {/* Theme Toggle Button */}
+            <Button
+              variant={theme === 'dark' ? 'light' : 'dark'}
+              onClick={toggleTheme}
+              size="sm"
+            >
+              {theme === 'dark' ? '🌞 Light' : '🌙 Dark'}
+            </Button>
+          </div>
         </Container>
       </div>
     </div>

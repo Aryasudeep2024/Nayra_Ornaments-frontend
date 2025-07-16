@@ -58,19 +58,6 @@ const ResetPassword = () => {
           />
         </div>
 
-        <div className="mb-3">
-          <label>Select Role</label>
-          <select
-            className="form-select"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            required
-          >
-            <option value="user">User</option>
-            <option value="seller">Seller</option>
-          </select>
-        </div>
 
         <div className="mb-3">
           <label>New Password</label>

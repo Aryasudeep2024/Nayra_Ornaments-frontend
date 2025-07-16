@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import AdminOrders from "../components/adminDashboard/AdminOrders";
 import { logout as logoutAction, setCredentials } from "../features/auth/authSlice";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer"
@@ -89,6 +90,14 @@ const AdminDashboard = () => {
               </button>
             </li>
             <li className="nav-item mb-2">
+  <button
+    className={`btn w-100 ${activeSection === "confirmOrders" ? "btn-warning" : "btn-outline-light"}`}
+    onClick={() => setActiveSection("confirmOrders")}
+  >
+    📬 Confirm Orders
+  </button>
+</li>
+            <li className="nav-item mb-2">
               <button
                 className={`btn w-100 ${activeSection === "sellerApproval" ? "btn-warning" : "btn-outline-light"}`}
                 onClick={() => setActiveSection("sellerApproval")}
@@ -128,6 +137,7 @@ const AdminDashboard = () => {
           {activeSection === "addProduct" && <AddProduct />}
           {activeSection === "viewProducts" && <ViewProducts />}
           {activeSection === "sellerApproval" && <SellerApproval />}
+          {activeSection === "confirmOrders" && <AdminOrders />}
         </div>
       </div>
       <Footer/>

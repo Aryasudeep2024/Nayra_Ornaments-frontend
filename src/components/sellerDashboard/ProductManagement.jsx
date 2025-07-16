@@ -70,7 +70,7 @@ const ProductManagement = () => {
         <div className="mb-3 p-3 bg-light rounded shadow-sm" style={{ maxWidth: '400px' }}>
           <strong>Select Category:</strong>
           <div className="d-flex flex-wrap mt-2 gap-2">
-            {['Ring', 'Bangles', 'Pendants', 'Necklaces'].map((category) => (
+            {['Ring', 'Bangles', 'Pendant', 'Necklace'].map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? 'primary' : 'outline-primary'}

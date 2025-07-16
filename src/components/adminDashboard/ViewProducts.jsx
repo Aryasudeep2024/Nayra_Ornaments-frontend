@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import API from "../../api/axios";
 import { Modal, Button, Form } from "react-bootstrap";
+import { useTheme } from "../../context/ThemeContext"; // ✅ Theme support
 
 const ViewProducts = () => {
   const [productId, setProductId] = useState("");
@@ -10,17 +11,22 @@ const ViewProducts = () => {
     description: "",
     price: "",
     quantity: "",
-    image: null,
+    image: "",
   });
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+
+  const { theme } = useTheme(); // ✅
+
   const fetchProduct = async () => {
     if (!productId.trim()) return setError("Enter a valid product ID");
     try {
       setLoading(true);
-
       const response = await API.get(`/admin/product/${productId}`, {
         withCredentials: true,
       });
@@ -29,11 +35,11 @@ const ViewProducts = () => {
 
       setProduct(data);
       setFormData({
-        title: data.name || "", // <== use name from backend
+        title: data.name || "",
         description: data.description || "",
         price: data.price || 0,
         quantity: data.quantity || 0,
-        image: null,
+        image: data.image || "",
       });
 
       setShowModal(true);
@@ -57,7 +63,7 @@ const ViewProducts = () => {
 
   const handleUpdate = async () => {
     const form = new FormData();
-    form.append("name", formData.title); // ✅ send `title` as `name` to match backend
+    form.append("name", formData.title);
     form.append("description", formData.description);
     form.append("price", formData.price);
     form.append("quantity", formData.quantity);
@@ -70,25 +76,33 @@ const ViewProducts = () => {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("✅ Product updated successfully");
-      handleCloseModal();
+      setResultMessage("✅ Product updated successfully");
+      setShowResultModal(true);
     } catch (err) {
       console.error("Update failed:", err);
-      alert("❌ Failed to update product");
+      setResultMessage("❌ Failed to update product");
+      setShowResultModal(true);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    setShowConfirmDelete(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       await API.delete(`/admin/delete/${product._id}`, {
         withCredentials: true,
       });
-      alert("🗑️ Product deleted successfully");
-      handleCloseModal();
+      setShowConfirmDelete(false);
+      setShowModal(false);
+      setResultMessage("🗑️ Product deleted successfully");
+      setShowResultModal(true);
     } catch (err) {
       console.error("Delete failed:", err);
-      alert("❌ Failed to delete product");
+      setShowConfirmDelete(false);
+      setResultMessage("❌ Failed to delete product");
+      setShowResultModal(true);
     }
   };
 
@@ -105,8 +119,16 @@ const ViewProducts = () => {
   };
 
   return (
-    <div>
+    <div
+      className="p-4 rounded shadow-sm"
+      style={{
+        backgroundColor: theme === "dark" ? "#1f1f1f" : "#ffffff",
+        color: theme === "dark" ? "#ffffff" : "#000000",
+        transition: "all 0.3s ease",
+      }}
+    >
       <h3 className="mb-4">📦 View & Manage Product by ID</h3>
+
       <Form
         className="d-flex mb-3"
         onSubmit={(e) => {
@@ -119,16 +141,31 @@ const ViewProducts = () => {
           placeholder="Enter Product ID"
           value={productId}
           onChange={(e) => setProductId(e.target.value)}
+          style={{
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            color: theme === "dark" ? "#fff" : "#000",
+            border: theme === "dark" ? "1px solid #666" : "",
+          }}
         />
         <Button variant="primary" className="ms-2" onClick={fetchProduct} disabled={loading}>
           {loading ? "Loading..." : "View Product"}
         </Button>
       </Form>
-      {error && <p className="text-danger">{error}</p>}
 
-      {/* Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
+      {error && (
+        <p style={{ color: theme === "dark" ? "#ff6b6b" : "#dc3545" }} className="fw-semibold">
+          {error}
+        </p>
+      )}
+
+      {/* Product Modal */}
+      <Modal
+        show={showModal}
+        onHide={handleCloseModal}
+        centered
+        contentClassName={theme === "dark" ? "bg-dark text-light" : ""}
+      >
+        <Modal.Header closeButton closeVariant={theme === "dark" ? "white" : undefined}>
           <Modal.Title>Manage Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -138,9 +175,14 @@ const ViewProducts = () => {
                 <Form.Label>Title</Form.Label>
                 <Form.Control
                   type="text"
-                  name="title" // ✅ matches formData.title
+                  name="title"
                   value={formData.title}
                   onChange={handleInputChange}
+                  style={{
+                    backgroundColor: theme === "dark" ? "#2a2a2a" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000",
+                    border: theme === "dark" ? "1px solid #555" : undefined,
+                  }}
                 />
               </Form.Group>
 
@@ -151,6 +193,11 @@ const ViewProducts = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
+                  style={{
+                    backgroundColor: theme === "dark" ? "#2a2a2a" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000",
+                    border: theme === "dark" ? "1px solid #555" : undefined,
+                  }}
                 />
               </Form.Group>
 
@@ -161,6 +208,11 @@ const ViewProducts = () => {
                   name="price"
                   value={formData.price}
                   onChange={handleInputChange}
+                  style={{
+                    backgroundColor: theme === "dark" ? "#2a2a2a" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000",
+                    border: theme === "dark" ? "1px solid #555" : undefined,
+                  }}
                 />
               </Form.Group>
 
@@ -171,6 +223,11 @@ const ViewProducts = () => {
                   name="quantity"
                   value={formData.quantity}
                   onChange={handleInputChange}
+                  style={{
+                    backgroundColor: theme === "dark" ? "#2a2a2a" : "#fff",
+                    color: theme === "dark" ? "#fff" : "#000",
+                    border: theme === "dark" ? "1px solid #555" : undefined,
+                  }}
                 />
               </Form.Group>
 
@@ -178,10 +235,10 @@ const ViewProducts = () => {
                 <Form.Label>Image</Form.Label>
                 <Form.Control type="file" name="image" onChange={handleInputChange} />
                 <img
-                  src={product.imageUrl}
-                  alt="Current"
+                  src={product.image}
+                  alt="Product"
                   className="img-thumbnail mt-2"
-                  style={{ maxHeight: "100px" }}
+                  style={{ maxHeight: "100px", objectFit: "contain" }}
                 />
               </Form.Group>
             </>
@@ -196,6 +253,39 @@ const ViewProducts = () => {
           </Button>
           <Button variant="secondary" onClick={handleCloseModal}>
             Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showConfirmDelete} onHide={() => setShowConfirmDelete(false)} centered>
+        <Modal.Header closeButton className={theme === "dark" ? "bg-dark text-light" : ""}>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={theme === "dark" ? "bg-dark text-light" : ""}>
+          Are you sure you want to delete this product?
+        </Modal.Body>
+        <Modal.Footer className={theme === "dark" ? "bg-dark" : ""}>
+          <Button variant="secondary" onClick={() => setShowConfirmDelete(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Success / Failure Feedback Modal */}
+      <Modal show={showResultModal} onHide={() => setShowResultModal(false)} centered>
+        <Modal.Header closeButton className={theme === "dark" ? "bg-dark text-light" : ""}>
+          <Modal.Title>Message</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={theme === "dark" ? "bg-dark text-light" : ""}>
+          {resultMessage}
+        </Modal.Body>
+        <Modal.Footer className={theme === "dark" ? "bg-dark" : ""}>
+          <Button variant="primary" onClick={() => setShowResultModal(false)}>
+            OK
           </Button>
         </Modal.Footer>
       </Modal>

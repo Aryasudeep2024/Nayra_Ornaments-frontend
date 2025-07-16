@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "../../api/axios";
 import { setCredentials } from "../../features/auth/authSlice";
+import { ThemeContext } from "../../context/ThemeContext"; // ✅ Theme context
 
 const UpdateUser = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const { theme } = useContext(ThemeContext); // 🎯 Get current theme
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    password: "", // optional
+    password: "",
     profilePic: user?.profilePic || ""
   });
 
@@ -35,7 +37,7 @@ const UpdateUser = () => {
         withCredentials: true
       });
 
-      dispatch(setCredentials(res.data.data)); // update Redux state
+      dispatch(setCredentials(res.data.data));
       setSuccessMsg("✅ Profile updated successfully!");
     } catch (err) {
       console.error("Update failed:", err);
@@ -44,16 +46,19 @@ const UpdateUser = () => {
   };
 
   return (
-    <div className="container">
+    <div className={`container py-4 ${theme === "dark" ? "text-light bg-dark" : "text-dark bg-light"}`}>
       <h3 className="mb-4">✏️ Update Profile</h3>
 
-      <form className="card p-4 shadow-sm" onSubmit={handleSubmit}>
+      <form
+        className={`card p-4 shadow-sm ${theme === "dark" ? "bg-secondary text-light" : "bg-white text-dark"}`}
+        onSubmit={handleSubmit}
+      >
         <div className="mb-3">
           <label className="form-label">Name</label>
           <input
             type="text"
             name="name"
-            className="form-control"
+            className={`form-control ${theme === "dark" ? "bg-dark text-light border-secondary" : ""}`}
             value={formData.name}
             onChange={handleChange}
             required
@@ -65,21 +70,24 @@ const UpdateUser = () => {
           <input
             type="email"
             name="email"
-            className="form-control"
+            className={`form-control ${theme === "dark" ? "bg-dark text-light border-secondary" : ""}`}
             value={formData.email}
             onChange={handleChange}
             required
           />
         </div>
 
-        
-
-        
+        {/* You can enable password or profilePic field later if needed */}
 
         {errorMsg && <p className="text-danger">{errorMsg}</p>}
         {successMsg && <p className="text-success">{successMsg}</p>}
 
-        <button type="submit" className="btn btn-primary w-100">Update</button>
+        <button
+          type="submit"
+          className={`btn ${theme === "dark" ? "btn-light" : "btn-primary"} w-100`}
+        >
+          Update
+        </button>
       </form>
     </div>
   );

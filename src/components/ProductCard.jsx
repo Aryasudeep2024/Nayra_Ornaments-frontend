@@ -13,6 +13,9 @@ const ProductCard = ({ product }) => {
     <Card 
       className="m-3 shadow-sm h-100"
       style={{ 
+        backgroundColor: '#fff',
+    color: '#000',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
         width: '100%',
         minHeight: '420px',
         display: 'flex',

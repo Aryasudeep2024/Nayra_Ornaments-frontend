@@ -6,7 +6,7 @@ const HeroCarousel = () => {
       <div className="carousel-inner">
 
         {/* Slide 1 - Video */}
-        <div className="carousel-item position-relative" style={{ height: '90vh', overflow: 'hidden' }}>
+        <div className="carousel-item active position-relative" style={{ height: '90vh', overflow: 'hidden' }}>
   <video
     className="d-block w-100 h-100"
     autoPlay
@@ -27,7 +27,7 @@ const HeroCarousel = () => {
 </div>
 
         {/* Slide 2 - Image */}
-        <div className="carousel-item active position-relative" style={{ height: '90vh', overflow: 'hidden' }}>
+        <div className="carousel-item  position-relative" style={{ height: '90vh', overflow: 'hidden' }}>
   <img
     src="/images/diamonds-arrangement-pink-background.jpg"
     className="d-block w-100 h-100"
