@@ -40,7 +40,7 @@ const Register = () => {
         name, email, password, profilePic
       });
 
-      navigate("/user/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       setErrorMsg(error.response?.data?.error || "Something went wrong");
     }
