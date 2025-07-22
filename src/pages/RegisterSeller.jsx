@@ -51,7 +51,7 @@ const SellerRegister = () => {
       });
 
       setSuccessMsg(response.data.message);
-      navigate("/user/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       setErrorMsg(error.response?.data?.message || "Something went wrong");
     }
