@@ -61,7 +61,7 @@ const UserDashboard = () => {
     try {
       await axios.delete("/user/delete", { withCredentials: true });
       dispatch(logoutAction());
-      navigate("/register-user");
+      navigate("/dashboard");
     } catch (error) {
       console.error("❌ Error deleting account", error);
     }
