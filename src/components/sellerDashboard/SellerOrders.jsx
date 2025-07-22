@@ -100,7 +100,7 @@ const SellerOrders = () => {
               ))}
             </Row>
 
-            {order.orderStatus !== "confirmed" && (
+            {order.orderStatus?.toLowerCase() !== "confirmed" && (
               <div className="text-end">
                 <Button
                   variant={theme === "dark" ? "light" : "success"}
