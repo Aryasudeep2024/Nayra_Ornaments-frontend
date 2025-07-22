@@ -57,7 +57,7 @@ const SellerDashboard = () => {
       setShowDeleteModal(false);
       await axios.delete("/seller/delete-account", { withCredentials: true });
       dispatch(logoutAction());
-      navigate("/register-seller");
+      navigate("/dashboard");
     } catch (error) {
       console.error("❌ Error deleting seller account", error);
     }
